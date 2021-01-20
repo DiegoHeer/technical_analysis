@@ -1,0 +1,6 @@
+mplfinance==0.12.7a4
+matplotlib==3.3.3
+TA_Lib==0.4.19
+pandas==1.2.0
+python_dateutil==2.8.1
+talib==0.1.1

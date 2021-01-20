@@ -48,10 +48,41 @@ class TA:
         # Get MA for 10 trading days
         self.data['ma10'] = talib.MA(self.data['Close'], timeperiod=10)
 
-        # # Get Stochastics
-        # self.data['stoch'] = talib.STOCH(self.data['Close'])
+        # Get Stochastics
+        self.data['stoch'], self.data['stoch_signal'] = talib.STOCH(self.data['High'], self.data['Low'],
+                                                                    self.data['Close'], fastk_period=14, slowk_period=5)
 
         return self.data
+
+    def get_stoch_buy_sell(self):
+        # This function gives the buy or sell answer for the last stock price related to the Stochastics indicator
+        last_stoch_value = self.data.tail(1)['stoch'].values[0]
+        last_stoch_signal = self.data.tail(1)['stoch_signal'].values[0]
+
+        if last_stoch_value > last_stoch_signal:
+            return 'buy'
+        else:
+            return 'sell'
+
+    def get_macd_buy_sell(self):
+        # This function gives the buy or sell answer for the last stock price related to the MACD indicator
+        last_macd_value = self.data.tail(1)['macd'].values[0]
+        last_macd_signal_value = self.data.tail(1)['macd_signal'].values[0]
+
+        if last_macd_value > last_macd_signal_value:
+            return 'buy'
+        else:
+            return 'sell'
+
+    def get_ma10_buy_sell(self):
+        # This function gives the buy or sell answer for the last stock price related to the MA10 indicator
+        last_ma10_value = self.data.tail(1)['ma10'].values[0]
+        last_close_price = self.data.tail(1)['Close'].values[0]
+
+        if last_close_price > last_ma10_value:
+            return 'buy'
+        else:
+            return 'sell'
 
     def plot_chart(self, num_observations):
         # Filter number of observations to plot
@@ -59,10 +90,10 @@ class TA:
 
         # Create figure and set axes for subplots
         fig = plt.figure()
-        fig.set_size_inches((20, 16))
-        ax_candle = fig.add_axes((0, 0.72, 1, 0.32))
-        ax_macd = fig.add_axes((0, 0.48, 1, 0.2), sharex=ax_candle)
-        ax_vol = fig.add_axes((0, 0, 1, 0.2), sharex=ax_candle)
+        fig.set_size_inches((20, 10))
+        ax_candle = fig.add_axes((0, 0.48, 1, 0.32))
+        ax_macd = fig.add_axes((0, 0.24, 1, 0.2), sharex=ax_candle)
+        ax_stoch = fig.add_axes((0, 0, 1, 0.2), sharex=ax_candle)
 
         # Format x-axis ticks as dates
         ax_candle.xaxis_date()
@@ -79,14 +110,15 @@ class TA:
         ax_candle.legend()
 
         # Plot MACD
+        ax_stoch.plot(self.data.index, self.data["stoch"], label="stoch")
+        ax_stoch.plot(self.data.index, self.data["stoch_signal"], label="signal")
+        ax_stoch.legend()
+
+        # Plot Stochastics
         ax_macd.plot(self.data.index, self.data["macd"], label="macd")
         ax_macd.bar(self.data.index, self.data["macd_hist"] * 3, label="hist")
         ax_macd.plot(self.data.index, self.data["macd_signal"], label="signal")
         ax_macd.legend()
-
-        # Show volume in millions
-        ax_vol.bar(self.data.index, self.data["Volume"] / 1000000)
-        ax_vol.set_ylabel("(Million)")
 
         # Save the chart as PNG
         fig.savefig(self.ticker + ".png", bbox_inches="tight")
@@ -95,7 +127,9 @@ class TA:
 
 
 if __name__ == '__main__':
-    test = TA("AAPL")
+    test = TA("TSLA")
     test.get_price_history()
-    test.get_indicators()
-    test.plot_chart(180)
+    result = test.get_indicators()
+    # result.to_excel('test.xlsx')
+    # test.plot_chart(180)
+    print(test.get_stoch_buy_sell())
