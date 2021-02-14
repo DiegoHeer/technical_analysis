@@ -157,7 +157,7 @@ class TA:
         handles.append(
             mpatches.Patch(color='none', label=f"Last Close Date: {last_close_date}"))
         handles.append(
-            mpatches.Patch(color='none', label=f"Last Volume: {round(last_vol/1000000, 2)} Million"))
+            mpatches.Patch(color='none', label=f"Last Volume: {round(last_vol / 1000000, 2)} Million"))
         ax_candle.legend(handles=handles, loc=2)
 
         # Format all x axis accordingly
@@ -196,10 +196,12 @@ class TA:
         ax_macd.legend(loc=2)
 
         # Save the chart as PNG
-        if fig_dir is not None and show_fig is True:
-            fig_path = os.path.join(fig_dir, self.ticker + ".png")
+        if fig_dir is not None:
+            fig_path = os.path.join(fig_dir, self.ticker + ".jpg")
             fig.savefig(fig_path, bbox_inches="tight")
-            os.startfile(fig_path)
+
+            if show_fig is True:
+                os.startfile(fig_path)
 
 
 if __name__ == '__main__':
@@ -207,5 +209,6 @@ if __name__ == '__main__':
     test.get_price_history()
     result = test.get_indicators()
     # result.to_excel('test.xlsx')
-    test.plot_chart(num_months=4, fig_dir=r'D:\PythonProjects\technical_analysis\technical_analysis\tests', show_fig=True)
+    test.plot_chart(num_months=4, fig_dir=r'D:\PythonProjects\technical_analysis\technical_analysis\tests',
+                    show_fig=True)
     # print(test.get_stoch_buy_sell())
